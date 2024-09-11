@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\DAMZ-1092024.props" />
+</Project>

@@ -16,29 +16,53 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+var productos = new List<Productos>();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.MapGet("/productos", () =>{
+    return productos;
+});
+
+app.MapGet("/productos/{id}", (int id) =>{
+    var producto = productos.FirstOrDefault(p => p.Id == id);
+    return producto;
+});
+
+app.MapPost("/productos", (Productos producto) =>{
+    productos.Add(producto);
+    return Results.Ok();
+});
+
+app.MapPut("/productos/{id}", (int id, Productos producto) =>{
+    var existingProducto = productos.FirstOrDefault(p => p.Id == id);
+    if (existingProducto != null){
+        existingProducto.Nombre = producto.Nombre;
+        existingProducto.Precio = producto.Precio;
+        existingProducto.Categoria = producto.Categoria;
+        existingProducto.Marca = producto.Marca;
+        return Results.Ok();
+    }
+    else{
+        return Results.NotFound();
+    }
+});
+
+app.MapDelete("/productos/{id}", (int id) =>{
+    var existingProducto = productos.FirstOrDefault(p => p.Id == id);
+    if (existingProducto != null){ 
+        productos.Remove(existingProducto);
+        return Results.Ok();
+    }
+    else{
+        return Results.NotFound();
+    }
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+internal class Productos{
+    public int Id {get; set;}
+    public string Nombre {get; set;}
+    public decimal Precio {get; set;}
+    public string Categoria {get; set;}
+    public string Marca {get; set;}
 }
